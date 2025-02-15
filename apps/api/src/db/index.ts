@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
-import { Pool, DatabaseError } from "pg";
+import { Pool } from "pg";
 import * as dotenv from "dotenv";
 export * from "drizzle-orm";
 
