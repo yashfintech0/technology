@@ -5,6 +5,7 @@ import cors from "cors";
 import categoryRoutes from "@controller/category";
 import articleRoutes from "@controller/article";
 import articleContentRoutes from "@controller/article-content";
+import sectionRoutes from "@controller/section";
 import ErrorMiddleware from "middleware/ErrorMiddleware";
 
 export const createServer = (): Express => {
@@ -24,6 +25,7 @@ export const createServer = (): Express => {
   app.use("/api", categoryRoutes);
   app.use("/api", articleContentRoutes);
   app.use("/api", articleRoutes);
+  app.use("/api", sectionRoutes);
 
   app.use(ErrorMiddleware);
 
