@@ -1,5 +1,13 @@
 import crypto from "crypto";
 
+export function createSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
 export const pagination = (page: number, perRow: number) => (page - 1) * perRow;
 
 export const BASE62_CHARS =

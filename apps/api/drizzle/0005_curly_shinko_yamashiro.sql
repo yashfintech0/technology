@@ -1,0 +1,1 @@
+ALTER TABLE "article_content" ALTER COLUMN "article_id" SET DATA TYPE uuid;

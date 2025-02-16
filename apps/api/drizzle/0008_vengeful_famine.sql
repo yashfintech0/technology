@@ -1,0 +1,1 @@
+ALTER TABLE "article" RENAME COLUMN "tags1" TO "tags";
