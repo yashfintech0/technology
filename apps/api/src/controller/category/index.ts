@@ -55,7 +55,13 @@ class CategoryController extends Base {
     });
 
     logger.info(`Categories fetched successfully: count=${result.length}`);
-    return res.status(httpStatusCode.OK).json({ result });
+    return this.response(
+      res,
+      httpStatusCode.OK,
+      httpStatus.SUCCESS,
+      "Category fetched successfully.",
+      result,
+    );
   });
 
   private deleteCategory = asyncHandler(async (req: Request, res: Response) => {

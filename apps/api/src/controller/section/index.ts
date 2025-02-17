@@ -117,9 +117,16 @@ class SectionController extends Base {
   private getSections = asyncHandler(async (req: Request, res: Response) => {
     logger.info("Fetching sections");
 
-    const result = await db.query.sectionTable.findMany();
+    const result = await db.query.sectionTable.findMany({});
 
     logger.info(`Sections fetched successfully: count=${result.length}`);
+    this.response(
+      res,
+      httpStatusCode.OK,
+      httpStatus.SUCCESS,
+      "Ssection fetched successfully.",
+      result,
+    );
     return res.status(httpStatusCode.OK).json({ result });
   });
 
