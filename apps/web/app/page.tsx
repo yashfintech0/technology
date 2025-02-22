@@ -52,7 +52,7 @@ export default function Home() {
       <header className="border-b sticky top-0 bg-background z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">NewsDaily</h1>
+            <h1 className="text-2xl font-bold">NewsDaily CMS</h1>
             <Navbar />
           </div>
         </div>

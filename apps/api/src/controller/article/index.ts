@@ -50,7 +50,13 @@ class ArticleController extends Base {
 
     const message = `The article '${title}' has been created successfully.`;
     logger.info(`Article created successfully: title=${title}`);
-    return this.response(res, httpStatusCode.OK, httpStatus.SUCCESS, message);
+    return this.response(
+      res,
+      httpStatusCode.OK,
+      httpStatus.SUCCESS,
+      message,
+      result,
+    );
   });
 
   private getArticles = asyncHandler(async (req: Request, res: Response) => {
