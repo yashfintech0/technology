@@ -8,7 +8,7 @@ export default {
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    ssl: "prefer",
+    ssl: false,
     host: process.env.PGHOST as string,
     user: process.env.PGUSER as string,
     password: process.env.PGPASSWORD as string,

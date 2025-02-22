@@ -1,11 +1,19 @@
 import { httpStatus, httpStatusCode } from "@customtype/http";
 import db from "@db/index";
-import { insertarticleSection, insertSection } from "@db/schema";
+import {
+  articleSectionTable,
+  articleTable,
+  insertarticleSection,
+  insertSection,
+  sectionTable,
+} from "@db/schema";
 import SectionService from "@services/section";
 import ApiError from "@utils/apiError";
 import asyncHandler from "@utils/asynHandler";
 import { Base } from "@utils/baseResponse";
+import { pagination } from "@utils/index";
 import logger from "@utils/logger";
+import { and, ilike, SQL, count, desc, eq, getTableColumns } from "drizzle-orm";
 import { Router, Request, Response } from "express";
 
 class SectionController extends Base {
@@ -21,8 +29,8 @@ class SectionController extends Base {
 
   private initializeRoutes() {
     // Article-Section routes
-    this.router.post("/sections/article", this.addArticleSection);
-    this.router.get("/sections/article", this.getArticleSections);
+    this.router.post("/sections/articles", this.addArticleSection);
+    this.router.get("/sections/:sectionId/articles", this.getArticleSections);
     this.router.delete("/sections/article/:id", this.deleteArticleSection);
 
     this.router.post("/sections", this.addSection);
@@ -60,14 +68,33 @@ class SectionController extends Base {
 
   private getArticleSections = asyncHandler(
     async (req: Request, res: Response) => {
+      const { sectionId } = req.params;
+      const { perRow = "1" } = req.query;
       logger.info("Fetching article-section links");
 
-      const result = await db.query.articleSectionTable.findMany();
+      const { id, title, description } = getTableColumns(articleTable);
+      const perPageRow = Math.max(1, Number(perRow));
+
+      const result = await db
+        .select({ id, title, description })
+        .from(articleSectionTable)
+        .where(eq(articleSectionTable.sectionId, sectionId as string))
+        .leftJoin(
+          articleTable,
+          eq(articleSectionTable.articleId, articleTable.id),
+        )
+        .limit(perPageRow);
 
       logger.info(
         `Article-section links fetched successfully: count=${result.length}`,
       );
-      return res.status(httpStatusCode.OK).json({ result });
+      this.response(
+        res,
+        httpStatusCode.OK,
+        httpStatus.SUCCESS,
+        "Article section fetched successfully.",
+        result,
+      );
     },
   );
 
@@ -115,21 +142,64 @@ class SectionController extends Base {
   });
 
   private getSections = asyncHandler(async (req: Request, res: Response) => {
-    logger.info("Fetching sections");
+    const { page = "1", perRow = "20", search } = req.query;
 
-    const result = await db.query.sectionTable.findMany({});
+    // Parse pagination parameters
+    const currentPage = Math.max(1, Number(page));
+    const perPageRow = Math.max(1, Number(perRow));
+    const skip = (currentPage - 1) * perPageRow;
 
-    logger.info(`Sections fetched successfully: count=${result.length}`);
-    this.response(
+    // Build filters
+    const filters: SQL[] = [];
+    if (search && typeof search === "string" && search.length > 0) {
+      filters.push(ilike(sectionTable.name, `%${search}%`));
+    }
+
+    // Fetch total count and sections in parallel
+    const [totalCountResult, sections] = await Promise.all([
+      db
+        .select({ count: count() })
+        .from(sectionTable)
+        .where(and(...filters)),
+      db
+        .select()
+        .from(sectionTable)
+        .where(and(...filters))
+        .limit(perPageRow)
+        .offset(skip)
+        .orderBy(desc(sectionTable.createdAt)),
+    ]);
+
+    // Fetch article counts for all sections in parallel
+    const sectionsWithArticleCounts = await Promise.all(
+      sections.map(async (section) => {
+        const articleCountResult = await db
+          .select({ count: count() })
+          .from(articleSectionTable)
+          .where(eq(articleSectionTable.sectionId, section.id));
+        return {
+          ...section,
+          articleCount: articleCountResult[0]?.count || 0,
+        };
+      }),
+    );
+
+    // Prepare the response
+    const result = {
+      totalCount: totalCountResult[0]?.count || 0,
+      sections: sectionsWithArticleCounts,
+    };
+
+    logger.info("Sections fetched successfully");
+
+    return this.response(
       res,
       httpStatusCode.OK,
       httpStatus.SUCCESS,
-      "Ssection fetched successfully.",
+      "Sections fetched successfully.",
       result,
     );
-    return res.status(httpStatusCode.OK).json({ result });
   });
-
   private updateSection = asyncHandler(async (req: Request, res: Response) => {
     const { sectionId, name, isMain } = req.body;
     logger.info(`Updating section: sectionId=${sectionId}`);
