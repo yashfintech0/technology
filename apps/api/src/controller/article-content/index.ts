@@ -1,11 +1,16 @@
 import { httpStatus, httpStatusCode } from "@customtype/http";
 import db from "@db/index";
-import { insertarticleContent } from "@db/schema";
+import {
+  articleContentTable,
+  articleTable,
+  insertarticleContent,
+} from "@db/schema";
 import ArticleContentService from "@services/articleContent";
 import ApiError from "@utils/apiError";
 import asyncHandler from "@utils/asynHandler";
 import { Base } from "@utils/baseResponse";
 import logger from "@utils/logger";
+import { eq, getTableColumns } from "drizzle-orm";
 import { Router, Request, Response } from "express";
 
 class ArticleContentController extends Base {
@@ -27,7 +32,39 @@ class ArticleContentController extends Base {
       "/articles/content/:contentId",
       this.deleteArticleContent,
     );
+    this.router.get(
+      "/articles/content/:articleId",
+      this.getArticleContentByArticleId,
+    );
   }
+
+  private getArticleContentByArticleId = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { articleId } = req.params;
+      const { title, isPublished } = getTableColumns(articleTable);
+      const { ...rest } = getTableColumns(articleContentTable);
+      const [content] = await db
+        .select({
+          ...rest,
+          title,
+          isPublished,
+        })
+        .from(articleContentTable)
+        .leftJoin(
+          articleTable,
+          eq(articleContentTable.articleId, articleTable.id),
+        )
+        .where(eq(articleContentTable.articleId, articleId as string));
+
+      return this.response(
+        res,
+        httpStatusCode.OK,
+        httpStatus.SUCCESS,
+        "Content Fethed successfully.",
+        content,
+      );
+    },
+  );
 
   private addArticleContent = asyncHandler(
     async (req: Request, res: Response) => {
@@ -73,16 +110,16 @@ class ArticleContentController extends Base {
 
   private updateArticleContent = asyncHandler(
     async (req: Request, res: Response) => {
-      const { contentId, content } = req.body;
-      logger.info(`Updating article content: contentId=${contentId}`);
+      const { articleId, content } = req.body;
+      logger.info(`Updating article content: articleId=${articleId}`);
 
       const result = await this.articleContentService.updateArticleContent(
-        contentId,
+        articleId,
         { content },
       );
 
       if (!result.updated) {
-        logger.warn(`Article content not found: contentId=${contentId}`);
+        logger.warn(`Article content not found: contentId=${articleId}`);
         throw new ApiError(
           "Article content does not exist.",
           httpStatusCode.BAD_REQUEST,
@@ -91,7 +128,7 @@ class ArticleContentController extends Base {
 
       const message = "The article content has been updated successfully.";
       logger.info(
-        `Article content updated successfully: contentId=${contentId}`,
+        `Article content updated successfully: contentId=${articleId}`,
       );
       return this.response(res, httpStatusCode.OK, httpStatus.SUCCESS, message);
     },

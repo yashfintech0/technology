@@ -7,13 +7,13 @@ class ArticleContentService {
   constructor() {}
 
   async updateArticleContent(
-    contentId: string,
+    articleId: string,
     data: Partial<insertarticleContent>,
   ): Promise<updateResponse> {
     const [result] = await db
       .update(articleContentTable)
       .set(data)
-      .where(eq(articleContentTable.id, contentId))
+      .where(eq(articleContentTable.articleId, articleId))
       .returning({ content: articleContentTable.content });
 
     if (!result || !result.content) {

@@ -1,12 +1,13 @@
 import { httpStatus, httpStatusCode } from "@customtype/http";
 import db from "@db/index";
-import { insertArticle } from "@db/schema";
+import { articleTable, insertArticle } from "@db/schema";
 import ArticleService from "@services/article";
 import ApiError from "@utils/apiError";
 import asyncHandler from "@utils/asynHandler";
 import { Base } from "@utils/baseResponse";
-import { createSlug } from "@utils/index";
+import { createSlug, pagination } from "@utils/index";
 import logger from "@utils/logger";
+import { and, count, desc, eq, ilike, SQL } from "drizzle-orm";
 import { Router, Request, Response } from "express";
 
 class ArticleController extends Base {
@@ -25,10 +26,27 @@ class ArticleController extends Base {
     this.router.get("/articles", this.getArticles);
     this.router.put("/articles", this.updateArticle);
     this.router.delete("/articles/:articleId", this.deleteArticle);
+    this.router.post("/articles/unpublish", this.unPublish);
   }
 
+  private unPublish = asyncHandler(async (req: Request, res: Response) => {
+    const { articleId } = req.body;
+    const unPublishArticle =
+      await this.articleService.unpublishArticle(articleId);
+    if (!unPublishArticle)
+      throw new ApiError(
+        "Article  does not exist.",
+        httpStatusCode.BAD_REQUEST,
+      );
+
+    const message = `The Article "${unPublishArticle.title}" has been un publish successfully.`;
+    return this.response(res, httpStatusCode.OK, httpStatus.SUCCESS, message);
+  });
+
   private addArticle = asyncHandler(async (req: Request, res: Response) => {
-    const { title, description, categoryId, imageUrl } = req.body;
+    const { title, description, categoryId, imageUrl, isPublished, tags } =
+      req.body;
+    logger.info(req.body);
     logger.info(`Adding new article: title=${title}`);
 
     const articleData: insertArticle = {
@@ -36,7 +54,9 @@ class ArticleController extends Base {
       description,
       categoryId,
       imageUrl,
+      tags,
       slug: createSlug(title),
+      isPublished,
     };
     const result = await this.articleService.addArticle(articleData);
 
@@ -60,28 +80,58 @@ class ArticleController extends Base {
   });
 
   private getArticles = asyncHandler(async (req: Request, res: Response) => {
-    logger.info("Fetching articles");
+    const { page, perRow, search } = req.query;
 
-    const result = await db.query.articleTable.findMany({});
-    const message = `Articles fetched successfully: count=${result.length}`;
-    logger.info(message);
+    let currentPage: number = 1;
+    let perPageRow: number = 20;
+
+    if (page && !isNaN(Number(page))) {
+      currentPage = Number(page);
+    }
+
+    if (perRow && !isNaN(Number(perRow))) {
+      perPageRow = Number(perRow);
+    }
+
+    const skip = pagination(currentPage, perPageRow);
+
+    const filters: SQL[] = [eq(articleTable.isPublished, true)];
+    if (search && search.length) {
+      filters.push(ilike(articleTable.title, `%${search}%`));
+    }
+
+    const [totalCount, articles] = await Promise.all([
+      db
+        .select({ count: count() })
+        .from(articleTable)
+        .where(and(...filters)),
+      db
+        .select()
+        .from(articleTable)
+        .where(and(...filters))
+        .limit(perPageRow)
+        .offset(skip)
+        .orderBy(desc(articleTable.createdAt)),
+    ]);
+    const result = {
+      totalCount: totalCount[0]?.count,
+      articles,
+    };
     return this.response(
       res,
       httpStatusCode.OK,
       httpStatus.SUCCESS,
-      message,
+      "Articles fetched successfully.",
       result,
     );
   });
 
   private updateArticle = asyncHandler(async (req: Request, res: Response) => {
-    const { articleId, tags, imageUrl, title, description, categoryId } =
-      req.body;
+    const { articleId, tags, imageUrl, title, description } = req.body;
     logger.info(`Updating article: articleId=${articleId}, title=${title}`);
 
     const result = await this.articleService.updateArticle(articleId, {
       title,
-      categoryId,
       description,
       imageUrl,
       tags,
