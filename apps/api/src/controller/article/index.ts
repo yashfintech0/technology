@@ -9,6 +9,7 @@ import { createSlug, pagination } from "@utils/index";
 import logger from "@utils/logger";
 import { and, count, desc, eq, getTableColumns, ilike, SQL } from "drizzle-orm";
 import { Router, Request, Response } from "express";
+import { apiMiddleware } from "middleware/apiMiddleware";
 
 class ArticleController extends Base {
   router: Router;
@@ -23,13 +24,17 @@ class ArticleController extends Base {
 
   private initializeRoutes() {
     this.router.get(`/articles/section/:sectionId`, this.getArticlesForSection);
-    this.router.post("/articles", this.addArticle);
+    this.router.post("/articles", apiMiddleware, this.addArticle);
     this.router.get("/articles", this.getArticles);
-    this.router.put("/articles", this.updateArticle);
-    this.router.delete("/articles/:articleId", this.deleteArticle);
+    this.router.put("/articles", apiMiddleware, this.updateArticle);
+    this.router.delete(
+      "/articles/:articleId",
+      apiMiddleware,
+      this.deleteArticle,
+    );
     this.router.get("/articles/:articleId", this.getArticleById);
-    this.router.post("/articles/unpublish", this.unPublish);
-    this.router.post("/articles/publish", this.publishArticle);
+    this.router.post("/articles/unpublish", apiMiddleware, this.unPublish);
+    this.router.post("/articles/publish", apiMiddleware, this.publishArticle);
   }
 
   private getArticlesForSection = asyncHandler(

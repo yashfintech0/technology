@@ -1,5 +1,7 @@
 import crypto from "crypto";
 
+export const API_KEY = process.env.WEBSITE_API_KEY;
+
 export function createSlug(title: string): string {
   return title
     .toLowerCase()

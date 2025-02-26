@@ -12,6 +12,7 @@ import { Base } from "@utils/baseResponse";
 import logger from "@utils/logger";
 import { eq, getTableColumns } from "drizzle-orm";
 import { Router, Request, Response } from "express";
+import { apiMiddleware } from "middleware/apiMiddleware";
 
 class ArticleContentController extends Base {
   router: Router;
@@ -25,11 +26,20 @@ class ArticleContentController extends Base {
   }
 
   private initializeRoutes() {
-    this.router.post("/articles/content", this.addArticleContent);
+    this.router.post(
+      "/articles/content",
+      apiMiddleware,
+      this.addArticleContent,
+    );
     this.router.get("/articles/content", this.getArticleContents);
-    this.router.put("/articles/content", this.updateArticleContent);
+    this.router.put(
+      "/articles/content",
+      apiMiddleware,
+      this.updateArticleContent,
+    );
     this.router.delete(
       "/articles/content/:contentId",
+      apiMiddleware,
       this.deleteArticleContent,
     );
     this.router.get(

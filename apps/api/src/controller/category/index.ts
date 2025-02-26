@@ -7,6 +7,7 @@ import asyncHandler from "@utils/asynHandler";
 import { Base } from "@utils/baseResponse";
 import logger from "@utils/logger";
 import { Router, Request, Response } from "express";
+import { apiMiddleware } from "middleware/apiMiddleware";
 
 class CategoryController extends Base {
   router: Router;
@@ -20,10 +21,14 @@ class CategoryController extends Base {
   }
 
   private initializeRoutes() {
-    this.router.post("/categories", this.addCategory);
+    this.router.post("/categories", apiMiddleware, this.addCategory);
     this.router.get("/categories", this.getCategories);
-    this.router.put("/categories", this.updateCategory);
-    this.router.delete("/categories/:categoryId", this.deleteCategory);
+    this.router.put("/categories", apiMiddleware, this.updateCategory);
+    this.router.delete(
+      "/categories/:categoryId",
+      apiMiddleware,
+      this.deleteCategory,
+    );
   }
 
   private updateCategory = asyncHandler(async (req: Request, res: Response) => {

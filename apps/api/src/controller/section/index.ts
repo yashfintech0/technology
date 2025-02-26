@@ -13,6 +13,7 @@ import { Base } from "@utils/baseResponse";
 import logger from "@utils/logger";
 import { and, ilike, SQL, count, desc, eq, getTableColumns } from "drizzle-orm";
 import { Router, Request, Response } from "express";
+import { apiMiddleware } from "middleware/apiMiddleware";
 
 class SectionController extends Base {
   router: Router;
@@ -27,14 +28,26 @@ class SectionController extends Base {
 
   private initializeRoutes() {
     // Article-Section routes
-    this.router.post("/sections/articles", this.addArticleSection);
+    this.router.post(
+      "/sections/articles",
+      apiMiddleware,
+      this.addArticleSection,
+    );
     this.router.get("/sections/:sectionId/articles", this.getSectionArticles);
-    this.router.delete("/sections/articles/:id", this.deleteArticleSection);
+    this.router.delete(
+      "/sections/articles/:id",
+      apiMiddleware,
+      this.deleteArticleSection,
+    );
 
-    this.router.post("/sections", this.addSection);
+    this.router.post("/sections", apiMiddleware, this.addSection);
     this.router.get("/sections", this.getSections);
-    this.router.put("/sections", this.updateSection);
-    this.router.delete("/sections/:sectionId", this.deleteSection);
+    this.router.put("/sections", apiMiddleware, this.updateSection);
+    this.router.delete(
+      "/sections/:sectionId",
+      apiMiddleware,
+      this.deleteSection,
+    );
     this.router.get("/sections/:sectionId", this.getSectionDetailsById);
   }
 
