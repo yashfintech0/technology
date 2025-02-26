@@ -3,7 +3,6 @@ import db from "@db/index";
 import {
   articleSectionTable,
   articleTable,
-  insertarticleSection,
   insertSection,
   sectionTable,
 } from "@db/schema";
@@ -11,7 +10,6 @@ import SectionService from "@services/section";
 import ApiError from "@utils/apiError";
 import asyncHandler from "@utils/asynHandler";
 import { Base } from "@utils/baseResponse";
-import { pagination } from "@utils/index";
 import logger from "@utils/logger";
 import { and, ilike, SQL, count, desc, eq, getTableColumns } from "drizzle-orm";
 import { Router, Request, Response } from "express";
@@ -30,29 +28,56 @@ class SectionController extends Base {
   private initializeRoutes() {
     // Article-Section routes
     this.router.post("/sections/articles", this.addArticleSection);
-    this.router.get("/sections/:sectionId/articles", this.getArticleSections);
-    this.router.delete("/sections/article/:id", this.deleteArticleSection);
+    this.router.get("/sections/:sectionId/articles", this.getSectionArticles);
+    this.router.delete("/sections/articles/:id", this.deleteArticleSection);
 
     this.router.post("/sections", this.addSection);
     this.router.get("/sections", this.getSections);
     this.router.put("/sections", this.updateSection);
     this.router.delete("/sections/:sectionId", this.deleteSection);
+    this.router.get("/sections/:sectionId", this.getSectionDetailsById);
   }
+
+  private getSectionDetailsById = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { sectionId } = req.params;
+      const section = await this.sectionService.getSectionById(
+        sectionId as string,
+      );
+      if (!section)
+        throw new ApiError(
+          "Section does not exist.",
+          httpStatusCode.BAD_REQUEST,
+        );
+      return this.response(
+        res,
+        httpStatusCode.OK,
+        httpStatus.SUCCESS,
+        "Section details fetched successfully",
+        section,
+      );
+    },
+  );
 
   private addArticleSection = asyncHandler(
     async (req: Request, res: Response) => {
-      const { articleId, sectionId } = req.body;
+      const { articleIds, sectionId } = req.body;
       logger.info(
-        `Linking article to section: articleId=${articleId}, sectionId=${sectionId}`,
+        `Linking article to section: articleId=${articleIds}, sectionId=${sectionId}`,
       );
 
-      const articleSectionData: insertarticleSection = { articleId, sectionId };
-      const result =
-        await this.sectionService.addArticleSection(articleSectionData);
+      const result = await Promise.all(
+        articleIds.map((id: string) =>
+          this.sectionService.addArticleSection({
+            articleId: id,
+            sectionId,
+          }),
+        ),
+      );
 
-      if (!result || !result.id) {
+      if (!result.length) {
         logger.error(
-          `Error while linking article to section: articleId=${articleId}, sectionId=${sectionId}`,
+          `Error while linking article to section: articleId=${articleIds}, sectionId=${sectionId}`,
         );
         throw new ApiError(
           "Something went wrong while linking article to section.",
@@ -66,17 +91,17 @@ class SectionController extends Base {
     },
   );
 
-  private getArticleSections = asyncHandler(
+  private getSectionArticles = asyncHandler(
     async (req: Request, res: Response) => {
       const { sectionId } = req.params;
       const { perRow = "1" } = req.query;
       logger.info("Fetching article-section links");
 
-      const { id, title, description } = getTableColumns(articleTable);
+      const { ...rest } = getTableColumns(articleTable);
       const perPageRow = Math.max(1, Number(perRow));
 
       const result = await db
-        .select({ id, title, description })
+        .select({ ...rest, articleSectionId: articleSectionTable.id })
         .from(articleSectionTable)
         .where(eq(articleSectionTable.sectionId, sectionId as string))
         .leftJoin(

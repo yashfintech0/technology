@@ -1,13 +1,13 @@
 import { httpStatus, httpStatusCode } from "@customtype/http";
 import db from "@db/index";
-import { articleTable, insertArticle } from "@db/schema";
+import { articleSectionTable, articleTable, insertArticle } from "@db/schema";
 import ArticleService from "@services/article";
 import ApiError from "@utils/apiError";
 import asyncHandler from "@utils/asynHandler";
 import { Base } from "@utils/baseResponse";
 import { createSlug, pagination } from "@utils/index";
 import logger from "@utils/logger";
-import { and, count, desc, eq, ilike, SQL } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, SQL } from "drizzle-orm";
 import { Router, Request, Response } from "express";
 
 class ArticleController extends Base {
@@ -22,12 +22,103 @@ class ArticleController extends Base {
   }
 
   private initializeRoutes() {
+    this.router.get(`/articles/section/:sectionId`, this.getArticlesForSection);
     this.router.post("/articles", this.addArticle);
     this.router.get("/articles", this.getArticles);
     this.router.put("/articles", this.updateArticle);
     this.router.delete("/articles/:articleId", this.deleteArticle);
+    this.router.get("/articles/:articleId", this.getArticleById);
     this.router.post("/articles/unpublish", this.unPublish);
+    this.router.post("/articles/publish", this.publishArticle);
   }
+
+  private getArticlesForSection = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { sectionId } = req.params;
+      const { search } = req.query;
+      const filters: SQL[] = [eq(articleTable.isPublished, true)];
+      if (search && search.length) {
+        filters.push(ilike(articleTable.title, `%${search}%`));
+      }
+
+      const articles = await db
+        .select({ id: articleTable.id, title: articleTable.title })
+        .from(articleTable)
+        .where(and(...filters))
+        .limit(50);
+
+      const { id, title, description } = getTableColumns(articleTable);
+
+      const sectionArticles = await db
+        .select({ id, title, description })
+        .from(articleSectionTable)
+        .where(eq(articleSectionTable.sectionId, sectionId as string))
+        .leftJoin(
+          articleTable,
+          eq(articleSectionTable.articleId, articleTable.id),
+        );
+
+      const pushedArticles = new Set(sectionArticles.map((item) => item.id));
+      const newData = articles.map((item) => ({
+        ...item,
+        isPushed: pushedArticles.has(item.id),
+      }));
+      return this.response(
+        res,
+        httpStatusCode.OK,
+        httpStatus.SUCCESS,
+        "Artilces feteched successfully.",
+        newData,
+      );
+    },
+  );
+
+  private getArticleById = asyncHandler(async (req: Request, res: Response) => {
+    const { articleId } = req.params;
+    const article = await this.articleService.getArticleById(
+      articleId as string,
+    );
+    if (!article)
+      throw new ApiError("Article does not exist", httpStatusCode.BAD_REQUEST);
+    return this.response(
+      res,
+      httpStatusCode.OK,
+      httpStatus.SUCCESS,
+      "Article feteched successfully.",
+      article,
+    );
+  });
+
+  private publishArticle = asyncHandler(async (req: Request, res: Response) => {
+    const { title, description, imageUrl, tags, articleId } = req.body;
+    const article = await this.articleService.getArticleById(
+      articleId as string,
+    );
+    if (!article)
+      throw new ApiError(
+        "Article doest not exist.",
+        httpStatusCode.BAD_REQUEST,
+      );
+    if (article.isPublished) {
+      throw new ApiError("Article already exist.", httpStatusCode.BAD_REQUEST);
+    }
+    const articleData: insertArticle = {
+      title,
+      tags,
+      slug: createSlug(title),
+      description,
+      imageUrl,
+      isPublished: true,
+    };
+    const response = await this.articleService.updateArticle(
+      articleId as string,
+      articleData,
+    );
+    if (!response.updated)
+      throw new ApiError("Something went wrong", httpStatusCode.BAD_REQUEST);
+    const message = `The "${response.name} has been published successfully.`;
+    return this.response(res, httpStatusCode.OK, httpStatus.SUCCESS, message);
+  });
 
   private unPublish = asyncHandler(async (req: Request, res: Response) => {
     const { articleId } = req.body;
