@@ -6,7 +6,7 @@ import {
   insertarticleSection,
   articleSectionTable,
 } from "@db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 class SectionService {
   constructor() {}
@@ -129,7 +129,8 @@ class SectionService {
     const result = await db
       .select()
       .from(sectionTable)
-      .where(eq(sectionTable.isMain, true));
+      .where(eq(sectionTable.isMain, true))
+      .orderBy(desc(sectionTable.createdAt));
 
     return result;
   }

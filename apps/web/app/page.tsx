@@ -1,21 +1,11 @@
 import Image from "next/image";
-import { ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { NewsTicker } from "@/components/news-ticker";
 import { AdBanner } from "@/components/ad-banner";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-
-function SectionHeader({ title }: { title: string }) {
-  return (
-    <div className="flex items-center justify-between mb-6">
-      <h2 className="text-2xl font-bold">{title}</h2>
-      <Button variant="ghost" size="sm" className="text-muted-foreground">
-        See More <ChevronRight className="w-4 h-4 ml-1" />
-      </Button>
-    </div>
-  );
-}
+import { apiClient } from "@/lib/apiClient";
+import MainSection from "@/components/section/main";
+import Section from "@/components/section";
 
 function ArticleCard({
   image,
@@ -45,15 +35,16 @@ function ArticleCard({
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const { data } = await apiClient.get(`/api/categories`);
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-scree  bg-background">
       <NewsTicker />
       <header className="border-b sticky top-0 bg-background z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">NewsDaily CMS</h1>
-            <Navbar />
+            <Navbar categories={data} />
           </div>
         </div>
       </header>
@@ -63,29 +54,11 @@ export default function Home() {
           {/* Main Content */}
           <div className="lg:col-span-9">
             {/* Featured Section */}
-            <section className="mb-6">
-              <article className="relative overflow-hidden">
-                <div className="relative aspect-[21/9]">
-                  <Image
-                    src="/placeholder.svg"
-                    alt="Featured article image"
-                    fill
-                    className="object-cover rounded-md"
-                  />
-                </div>
-                <div className="py-6">
-                  <h2 className="text-2xl font-bold mb-2">
-                    Record-Breaking, Stunning Performance Leads The Swimmer To A
-                    Victory, Securing Their Place In History
-                  </h2>
-                  <p className="text-muted-foreground">10 Minutes Read</p>
-                </div>
-              </article>
-            </section>
+            <MainSection />
+            <Section />
 
             {/* Trending Section */}
             <section className="mb-12">
-              <SectionHeader title="Trending Now" />
               <div className="grid md:grid-cols-2 gap-6">
                 <ArticleCard
                   image="/placeholder.svg?height=200&width=400"
@@ -116,7 +89,6 @@ export default function Home() {
 
             {/* Latest News Section */}
             <section>
-              <SectionHeader title="Latest News" />
               <div className="grid gap-6">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <Card key={i} className="border-none shadow-none">

@@ -1,5 +1,5 @@
-"use client"
-import Link from "next/link"
+"use client";
+import Link from "next/link";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -7,33 +7,32 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
+} from "@/components/ui/navigation-menu";
+import { Category } from "@/types/category";
 
-const categories = {
-  News: ["Politics", "World", "Local", "Business"],
-  Sports: ["Football", "Basketball", "Swimming", "Athletics"],
-  Entertainment: ["Movies", "Music", "Celebrity", "Culture"],
-  Technology: ["Gadgets", "Software", "Startups", "AI"],
-  Lifestyle: ["Health", "Food", "Travel", "Fashion"],
+interface Props {
+  categories: Category[];
 }
 
-export function Navbar() {
+export function Navbar({ categories }: Props) {
   return (
     <NavigationMenu className="hidden lg:flex">
       <NavigationMenuList>
-        {Object.entries(categories).map(([category, subcategories]) => (
-          <NavigationMenuItem key={category}>
-            <NavigationMenuTrigger>{category}</NavigationMenuTrigger>
+        {categories.map((category) => (
+          <NavigationMenuItem key={category.id}>
+            <NavigationMenuTrigger>{category.name}</NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
-                {subcategories.map((subcategory) => (
-                  <li key={subcategory}>
+                {category.subcategories.map((subcategory) => (
+                  <li key={subcategory.id}>
                     <NavigationMenuLink asChild>
                       <Link
-                        href="#"
+                        href={`/categories/${subcategory.id}`}
                         className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                       >
-                        <div className="text-sm font-medium leading-none">{subcategory}</div>
+                        <div className="text-sm font-medium leading-none">
+                          {subcategory.name}
+                        </div>
                       </Link>
                     </NavigationMenuLink>
                   </li>
@@ -44,6 +43,5 @@ export function Navbar() {
         ))}
       </NavigationMenuList>
     </NavigationMenu>
-  )
+  );
 }
-

@@ -11,7 +11,17 @@ import ApiError from "@utils/apiError";
 import asyncHandler from "@utils/asynHandler";
 import { Base } from "@utils/baseResponse";
 import logger from "@utils/logger";
-import { and, ilike, SQL, count, desc, eq, getTableColumns } from "drizzle-orm";
+import { throws } from "assert";
+import {
+  and,
+  ilike,
+  SQL,
+  count,
+  desc,
+  eq,
+  getTableColumns,
+  inArray,
+} from "drizzle-orm";
 import { Router, Request, Response } from "express";
 import { apiMiddleware } from "middleware/apiMiddleware";
 
@@ -33,6 +43,7 @@ class SectionController extends Base {
       apiMiddleware,
       this.addArticleSection,
     );
+    this.router.get("/sections/main/article", this.getMainSectionArticle);
     this.router.get("/sections/:sectionId/articles", this.getSectionArticles);
     this.router.delete(
       "/sections/articles/:id",
@@ -50,6 +61,55 @@ class SectionController extends Base {
     );
     this.router.get("/sections/:sectionId", this.getSectionDetailsById);
   }
+
+  private getMainSectionArticle = asyncHandler(
+    async (req: Request, res: Response) => {
+      const mainSection = await this.sectionService.getMainSections();
+      if (!mainSection.length)
+        throw new ApiError(
+          "Main section does not exist.",
+          httpStatusCode.BAD_REQUEST,
+        );
+      const { ...rest } = getTableColumns(articleTable);
+      const articles = await db
+        .select({ ...rest })
+        .from(articleSectionTable)
+        .where(
+          inArray(
+            articleSectionTable.sectionId,
+            mainSection.map((item) => item.id),
+          ),
+        )
+        .leftJoin(
+          articleTable,
+          eq(articleSectionTable.articleId, articleTable.id),
+        );
+      // Find the first valid article
+      const validArticle = articles.find(
+        (article) => article !== undefined && article !== null,
+      );
+
+      // If no valid article is found, return null
+      if (!validArticle) {
+        return this.response(
+          res,
+          httpStatusCode.OK,
+          httpStatus.SUCCESS,
+          "No valid article found.",
+          null,
+        );
+      }
+
+      // Return the first valid article
+      return this.response(
+        res,
+        httpStatusCode.OK,
+        httpStatus.SUCCESS,
+        "Article fetched successfully.",
+        validArticle,
+      );
+    },
+  );
 
   private getSectionDetailsById = asyncHandler(
     async (req: Request, res: Response) => {
