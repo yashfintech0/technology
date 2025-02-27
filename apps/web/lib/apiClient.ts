@@ -24,7 +24,7 @@ export const apiClient = (() => {
 
       // Use custom baseUrl if provided, otherwise fallback to BASE_URL
       const fullUrl = `${baseUrl || BASE_URL}${url}`;
-      console.log(BASE_URL);
+      console.log(BASE_URL, fullUrl);
 
       const parsedBody =
         body && typeof body === "object" && !(body instanceof FormData)
