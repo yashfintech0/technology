@@ -8,9 +8,10 @@ import SectionRowArticle from "./section-row-article";
 
 interface Props {
   section: Section;
+  row: boolean;
 }
 
-export default function SectionItem({ section }: Props) {
+export default function SectionItem({ section, row }: Props) {
   const [isPending, startTransition] = useTransition();
   const [error, seterror] = useState<null | string>(null);
   const [articles, setarticles] = useState<Article[]>([]);
@@ -36,16 +37,21 @@ export default function SectionItem({ section }: Props) {
       {articles.length < 1 ? (
         <div>No articles found </div>
       ) : (
-        <div className="grid grid-cols-2 gap-5">
-          {articles.map((article, index) => {
-            const isEven = index / 2 === 0;
-            return isEven ? (
-              <SectionArticleCard article={article} key={index} />
-            ) : (
-              <SectionRowArticle article={article} key={index} />
-            );
-          })}
-        </div>
+        <Fragment>
+          {row ? (
+            <div className="space-y-2">
+              {articles.map((article) => (
+                <SectionRowArticle article={article} key={article.id} />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {articles.map((article) => (
+                <SectionArticleCard article={article} key={article.id} />
+              ))}
+            </div>
+          )}
+        </Fragment>
       )}
     </Fragment>
   );

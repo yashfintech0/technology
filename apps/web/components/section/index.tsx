@@ -18,7 +18,7 @@ export default async function Section() {
           {data.sections.map((section: SectionType, index: number) => (
             <Fragment key={section.id}>
               <SectionHeader section={section} />
-              <SectionItem section={section} />
+              <SectionItem section={section} row={index / 2 !== 0} />
             </Fragment>
           ))}
         </Fragment>

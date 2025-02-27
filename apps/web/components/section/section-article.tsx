@@ -1,6 +1,8 @@
 import { Article } from "@/types/article";
 import { Card, CardContent } from "../ui/card";
 import Image from "next/image";
+import Link from "next/link";
+import { truncateValue } from "@/lib/utils";
 
 interface Props {
   article: Article;
@@ -18,8 +20,12 @@ export function SectionArticleCard({ article }: Props) {
             className="object-cover"
           />
         </div>
-        <h3 className="font-semibold mb-2 line-clamp-2">{article.title}</h3>
-        <p className="text-sm text-muted-foreground">{article.description}</p>
+        <Link href={`/articles/${article.slug}`}>
+          <h3 className="font-semibold mb-2 line-clamp-2">{article.title}</h3>
+          <p className="text-sm text-muted-foreground">
+            {truncateValue(article.description, 200)}
+          </p>
+        </Link>
       </CardContent>
     </Card>
   );

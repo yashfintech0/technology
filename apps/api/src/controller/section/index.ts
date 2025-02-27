@@ -11,7 +11,6 @@ import ApiError from "@utils/apiError";
 import asyncHandler from "@utils/asynHandler";
 import { Base } from "@utils/baseResponse";
 import logger from "@utils/logger";
-import { throws } from "assert";
 import {
   and,
   ilike,
@@ -167,8 +166,8 @@ class SectionController extends Base {
   private getSectionArticles = asyncHandler(
     async (req: Request, res: Response) => {
       const { sectionId } = req.params;
-      const { perRow = "1" } = req.query;
-      logger.info("Fetching article-section links");
+      const { perRow = "10" } = req.query;
+      logger.info(`Fetching article-section links ${sectionId} `);
 
       const { ...rest } = getTableColumns(articleTable);
       const perPageRow = Math.max(1, Number(perRow));

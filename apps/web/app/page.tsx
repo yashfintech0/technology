@@ -1,127 +1,16 @@
-import Image from "next/image";
-import { Navbar } from "@/components/navbar";
-import { NewsTicker } from "@/components/news-ticker";
 import { AdBanner } from "@/components/ad-banner";
-import { Card, CardContent } from "@/components/ui/card";
-import { apiClient } from "@/lib/apiClient";
 import MainSection from "@/components/section/main";
 import Section from "@/components/section";
 
-function ArticleCard({
-  image,
-  title,
-  readTime,
-}: {
-  image: string;
-  category: string;
-  title: string;
-  readTime: string;
-}) {
-  return (
-    <Card className="border-none shadow-none">
-      <CardContent className="py-4 px-0">
-        <div className="aspect-video relative rounded-lg overflow-hidden mb-4">
-          <Image
-            src={image || "/placeholder.svg"}
-            alt={title}
-            fill
-            className="object-cover"
-          />
-        </div>
-        <h3 className="font-semibold mb-2 line-clamp-2">{title}</h3>
-        <p className="text-sm text-muted-foreground">{readTime} Read</p>
-      </CardContent>
-    </Card>
-  );
-}
-
 export default async function Home() {
-  const { data } = await apiClient.get(`/api/categories`);
   return (
-    <div className="min-h-scree  bg-background">
-      <NewsTicker />
-      <header className="border-b sticky top-0 bg-background z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">NewsDaily CMS</h1>
-            <Navbar categories={data} />
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-12 gap-8">
-          {/* Main Content */}
           <div className="lg:col-span-9">
-            {/* Featured Section */}
             <MainSection />
             <Section />
-
-            {/* Trending Section */}
-            <section className="mb-12">
-              <div className="grid md:grid-cols-2 gap-6">
-                <ArticleCard
-                  image="/placeholder.svg?height=200&width=400"
-                  category="World"
-                  title="A Quiet Moment in the Crowd: A Monk Dives Into the News"
-                  readTime="6 Minutes"
-                />
-                <ArticleCard
-                  image="/placeholder.svg?height=200&width=400"
-                  category="Travel"
-                  title="Romania and Bulgaria fully join Europe's borderless travel zone"
-                  readTime="10 Minutes"
-                />
-                <ArticleCard
-                  image="/placeholder.svg?height=200&width=400"
-                  category="Technology"
-                  title="Emerging Startups Showcase Innovations at Local Tech"
-                  readTime="12 Minutes"
-                />
-                <ArticleCard
-                  image="/placeholder.svg?height=200&width=400"
-                  category="Sports"
-                  title="Championship Finals Set New Attendance Records"
-                  readTime="8 Minutes"
-                />
-              </div>
-            </section>
-
-            {/* Latest News Section */}
-            <section>
-              <div className="grid gap-6">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Card key={i} className="border-none shadow-none">
-                    <CardContent className="py-4 px-0">
-                      <div className="grid md:grid-cols-3 gap-4">
-                        <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
-                          <Image
-                            src="/placeholder.svg?height=200&width=300"
-                            alt="Latest news image"
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <h3 className="font-semibold mb-2">
-                            Latest Political Developments Shape Global Economic
-                            Policies
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                            Analysis of recent political decisions and their
-                            impact on international markets and trade
-                            relations...
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            15 Minutes Read
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
+            <section className="mb-12"></section>
           </div>
 
           {/* Right Sidebar - Advertisements */}

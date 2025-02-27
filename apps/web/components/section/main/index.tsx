@@ -21,7 +21,7 @@ export default async function MainSection() {
           />
         </div>
         <div className="py-6">
-          <Link href={`/article/${data.slug}`}>
+          <Link href={`/articles/${data.slug}`}>
             <h2 className="text-2xl font-bold mb-2">{data.title}</h2>
             <CardDescription>{data.description}</CardDescription>
           </Link>

@@ -2,6 +2,7 @@ import { httpStatus, httpStatusCode } from "@customtype/http";
 import db from "@db/index";
 import { articleSectionTable, articleTable, insertArticle } from "@db/schema";
 import ArticleService from "@services/article";
+import ArticleContentService from "@services/articleContent";
 import ApiError from "@utils/apiError";
 import asyncHandler from "@utils/asynHandler";
 import { Base } from "@utils/baseResponse";
@@ -14,16 +15,19 @@ import { apiMiddleware } from "middleware/apiMiddleware";
 class ArticleController extends Base {
   router: Router;
   private articleService: ArticleService;
+  private articleContentService: ArticleContentService;
 
   constructor() {
     super();
     this.router = Router();
     this.articleService = new ArticleService();
+    this.articleContentService = new ArticleContentService();
     this.initializeRoutes();
   }
 
   private initializeRoutes() {
     this.router.get(`/articles/section/:sectionId`, this.getArticlesForSection);
+    this.router.get(`/articles/slug/:slugId`, this.getArticleBySlug);
     this.router.post("/articles", apiMiddleware, this.addArticle);
     this.router.get("/articles", this.getArticles);
     this.router.put("/articles", apiMiddleware, this.updateArticle);
@@ -36,6 +40,39 @@ class ArticleController extends Base {
     this.router.post("/articles/unpublish", apiMiddleware, this.unPublish);
     this.router.post("/articles/publish", apiMiddleware, this.publishArticle);
   }
+
+  private getArticleBySlug = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { slugId } = req.params;
+      const [article] = await db
+        .select()
+        .from(articleTable)
+        .where(
+          and(
+            eq(articleTable.isPublished, true),
+            eq(articleTable.slug, slugId as string),
+          ),
+        );
+
+      if (!article)
+        throw new ApiError(
+          "Article does not exist.",
+          httpStatusCode.BAD_REQUEST,
+        );
+
+      const [articleContent] =
+        await this.articleContentService.getArticleContentByArticleId(
+          article?.id as string,
+        );
+      return this.response(
+        res,
+        httpStatusCode.OK,
+        httpStatus.SUCCESS,
+        "Artilce details fetched successfully",
+        { ...article, content: articleContent?.content },
+      );
+    },
+  );
 
   private getArticlesForSection = asyncHandler(
     async (req: Request, res: Response) => {
