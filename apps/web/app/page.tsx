@@ -16,7 +16,6 @@ export default async function page() {
           <div className="lg:col-span-9">
             <MainSection />
             <Section sections={data.sections} />
-            <section className="mb-12"></section>
           </div>
 
           {/* Right Sidebar - Advertisements */}

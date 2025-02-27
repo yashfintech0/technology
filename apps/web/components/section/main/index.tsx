@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
+export const revalidate = 6000;
+
 export default async function MainSection() {
   const { data, error } = await apiClient.get(`/api/sections/main/article`);
   if (error) {
