@@ -1,3 +1,6 @@
+"use client"; // Mark the component as a client component
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   NavigationMenu,
@@ -10,9 +13,22 @@ import {
 import { Category } from "@/types/category";
 import { apiClient } from "@/lib/apiClient";
 
-export async function Navbar() {
-  const { data: categories, error } = await apiClient.get(`/api/categories`);
-  if (error) return <div>{error}</div>;
+export function Navbar() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Fetch categories data on the client side
+    apiClient
+      .get(`/api/categories`)
+      .then((response) => setCategories(response.data))
+      .catch((err) => setError(err.message));
+  }, []);
+
+  if (error) {
+    return <div>Error loading categories: {error}</div>;
+  }
+
   return (
     <NavigationMenu className="hidden lg:flex">
       <NavigationMenuList>

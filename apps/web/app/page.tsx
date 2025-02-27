@@ -1,15 +1,21 @@
 import { AdBanner } from "@/components/ad-banner";
 import MainSection from "@/components/section/main";
 import Section from "@/components/section";
+import { apiClient } from "@/lib/apiClient";
 
-export default function page() {
+export default async function page() {
+  const { data, error } = await apiClient.get("/api/sections");
+  if (error) {
+    return <div>{error}</div>;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-12 gap-8">
           <div className="lg:col-span-9">
             <MainSection />
-            <Section />
+            <Section sections={data.sections} />
             <section className="mb-12"></section>
           </div>
 
