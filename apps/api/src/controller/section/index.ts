@@ -247,7 +247,7 @@ class SectionController extends Base {
     const skip = (currentPage - 1) * perPageRow;
 
     // Build filters
-    const filters: SQL[] = [eq(sectionTable.isMain, false)];
+    const filters: SQL[] = [];
     if (search && typeof search === "string" && search.length > 0) {
       filters.push(ilike(sectionTable.name, `%${search}%`));
     }

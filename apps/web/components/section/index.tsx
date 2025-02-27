@@ -1,13 +1,46 @@
-import React, { Fragment } from "react";
+"use client";
+
+import React, { Fragment, useEffect, useState, useTransition } from "react";
 import SectionItem from "./section-item";
 import { Section as SectionType } from "@/types/section";
 import { SectionHeader } from "./section-header";
+import { apiClient } from "@/lib/apiClient";
+import { Skeleton } from "../ui/skeleton";
 
-interface Props {
-  sections: SectionType[];
-}
+export default function Section() {
+  const [sections, setSections] = useState<SectionType[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-export default function Section({ sections }: Props) {
+  useEffect(() => {
+    startTransition(async () => {
+      const { data, error } = await apiClient.get("/api/sections");
+      if (error) {
+        setError(error);
+      } else {
+        setSections(data.sections);
+      }
+    });
+  }, []);
+
+  if (isPending) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-8 w-1/2" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div>Error loading sections: {error}</div>;
+  }
+
   return (
     <section>
       {sections.length < 1 ? (
