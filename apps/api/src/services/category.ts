@@ -6,6 +6,14 @@ import { eq } from "drizzle-orm";
 class CategoryService {
   constructor() {}
 
+  async getCategoryById(categoryId: string) {
+    const [result] = await db
+      .select()
+      .from(categoryTable)
+      .where(eq(categoryTable.id, categoryId));
+    return result;
+  }
+
   async updateCategory(
     categoryId: string,
     name: string,

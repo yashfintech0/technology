@@ -3,6 +3,7 @@ import db from "@db/index";
 import { articleSectionTable, articleTable, insertArticle } from "@db/schema";
 import ArticleService from "@services/article";
 import ArticleContentService from "@services/articleContent";
+import CategoryService from "@services/category";
 import ApiError from "@utils/apiError";
 import asyncHandler from "@utils/asynHandler";
 import { Base } from "@utils/baseResponse";
@@ -16,17 +17,23 @@ class ArticleController extends Base {
   router: Router;
   private articleService: ArticleService;
   private articleContentService: ArticleContentService;
+  private categoryService: CategoryService;
 
   constructor() {
     super();
     this.router = Router();
     this.articleService = new ArticleService();
     this.articleContentService = new ArticleContentService();
+    this.categoryService = new CategoryService();
     this.initializeRoutes();
   }
 
   private initializeRoutes() {
     this.router.get(`/articles/section/:sectionId`, this.getArticlesForSection);
+    this.router.get(
+      `/articles/category/:categoryId`,
+      this.getArticleByCategoryId,
+    );
     this.router.get(`/articles/slug/:slugId`, this.getArticleBySlug);
     this.router.post("/articles", apiMiddleware, this.addArticle);
     this.router.get("/articles", this.getArticles);
@@ -40,6 +47,40 @@ class ArticleController extends Base {
     this.router.post("/articles/unpublish", apiMiddleware, this.unPublish);
     this.router.post("/articles/publish", apiMiddleware, this.publishArticle);
   }
+
+  private getArticleByCategoryId = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { categoryId } = req.params;
+      const [articles, category] = await Promise.all([
+        db
+          .select()
+          .from(articleTable)
+          .where(
+            and(
+              eq(articleTable.isPublished, true),
+              eq(articleTable.categoryId, categoryId as string),
+            ),
+          ),
+        this.categoryService.getCategoryById(categoryId as string),
+      ]);
+      if (!category)
+        throw new ApiError(
+          "Category does not exist.",
+          httpStatusCode.BAD_REQUEST,
+        );
+      const data = {
+        articles,
+        category,
+      };
+      return this.response(
+        res,
+        httpStatusCode.OK,
+        httpStatus.SUCCESS,
+        "Articles fetched successfully.",
+        data,
+      );
+    },
+  );
 
   private getArticleBySlug = asyncHandler(
     async (req: Request, res: Response) => {
