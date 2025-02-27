@@ -7,7 +7,6 @@ import {
   Editor,
 } from "slate";
 import { ReactEditor } from "slate-react";
-import { HistoryEditor } from "slate-history";
 
 export interface List {
   id: string;
@@ -134,8 +133,7 @@ export type MyCustomElement =
   | MyBrElement;
 
 export type CustomEditor = BaseEditor &
-  ReactEditor &
-  HistoryEditor & {
+  ReactEditor & {
     nodeToDecorations?: Map<Element, Range[]>;
   };
 

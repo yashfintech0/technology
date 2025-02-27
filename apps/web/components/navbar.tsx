@@ -1,4 +1,3 @@
-"use client";
 import Link from "next/link";
 import {
   NavigationMenu,
@@ -9,16 +8,15 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Category } from "@/types/category";
+import { apiClient } from "@/lib/apiClient";
 
-interface Props {
-  categories: Category[];
-}
-
-export function Navbar({ categories }: Props) {
+export async function Navbar() {
+  const { data: categories, error } = await apiClient.get(`/api/categories`);
+  if (error) return <div>{error}</div>;
   return (
     <NavigationMenu className="hidden lg:flex">
       <NavigationMenuList>
-        {categories.map((category) => (
+        {categories.map((category: Category) => (
           <NavigationMenuItem key={category.id}>
             <NavigationMenuTrigger>{category.name}</NavigationMenuTrigger>
             <NavigationMenuContent>

@@ -11,8 +11,6 @@ export default async function page({ params }: Props) {
   const id = (await params).id;
   const { data, error } = await apiClient.get(`/api/sections/${id}/articles`);
 
-  // Handle errors
-
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">

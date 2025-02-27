@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
-import { apiClient } from "@/lib/apiClient";
 import Link from "next/link";
 
 const geistSans = localFont({
@@ -24,7 +23,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { data } = await apiClient.get(`/api/categories`);
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
@@ -34,7 +32,7 @@ export default async function RootLayout({
               <h1 className="text-2xl font-bold">
                 <Link href="/">NewsDaily CMS</Link>{" "}
               </h1>
-              <Navbar categories={data} />
+              <Navbar />
             </div>
           </div>
         </header>

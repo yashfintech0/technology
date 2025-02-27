@@ -2,7 +2,7 @@ import { AdBanner } from "@/components/ad-banner";
 import MainSection from "@/components/section/main";
 import Section from "@/components/section";
 
-export default async function Home() {
+export default function page() {
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8">
