@@ -7,7 +7,7 @@ const NumberList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ol
     ref={ref}
-    className={cn("my-6 ml-6 list-decimal  [&>li]:mt-2", className)}
+    className={cn("mt-4 ml-6 list-decimal  [&>li]:mt-2", className)}
     {...props}
   />
 ));

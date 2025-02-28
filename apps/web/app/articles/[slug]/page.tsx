@@ -43,6 +43,22 @@ export async function generateMetadata(
     title: data.title,
     description: data.description,
     keywords: data.tags.map((item: any) => item),
+    openGraph: {
+      title: data.title,
+      description: data.description,
+      url: `https://news.hiredsys.com/articles/${slug}`, // Replace with your actual domain
+      siteName: "News Daily",
+      images: [
+        {
+          url: data.imageUrl || "https://example.com/default-og-image.jpg", // Fallback image
+          width: 1200,
+          height: 630,
+          alt: data.title,
+        },
+      ],
+      type: "article",
+      locale: "en_US",
+    },
   };
 }
 

@@ -15,6 +15,7 @@ import HorizontalRuleBlock from "./Blocks/horizontal";
 import LinkBlock from "./Blocks/link";
 import NumberList from "./Blocks/number-list";
 import BulletedList from "./Blocks/bulleted-list";
+import ImageBlock from "./Blocks/image";
 
 const RenderElement = ({
   children,
@@ -41,6 +42,15 @@ const RenderElement = ({
         >
           {children}
         </Paragraph>
+      );
+
+    case "img":
+      return (
+        <ImageBlock
+          attributes={attributes}
+          element={element}
+          children={children}
+        />
       );
     case "h1":
       return (

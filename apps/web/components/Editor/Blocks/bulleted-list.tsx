@@ -7,7 +7,7 @@ const BulletedList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ul
     ref={ref}
-    className={cn("my-6 ml-6 list-disc [&>li]:mt-2", className)}
+    className={cn("mt-4 ml-6 list-disc [&>li]:mt-2", className)}
     {...props}
   />
 ));

@@ -10,7 +10,7 @@ const BlockQuote = React.forwardRef<HTMLQuoteElement, BlockquoteProps>(
     return (
       <blockquote
         ref={ref}
-        className={cn("border-l-2 pl-6 my-3 italic", className)}
+        className={cn("border-l-2 pl-6 mt-4 italic", className)}
         {...props}
       />
     );
@@ -27,7 +27,7 @@ const Paragraph = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p ref={ref} className={cn("leading-7", className)} {...props} />
+  <p ref={ref} className={cn("leading-7 mt-4", className)} {...props} />
 ));
 
 Paragraph.displayName = "Paragraph";
@@ -38,7 +38,7 @@ const Heading1 = React.forwardRef<HTMLHeadingElement, HeadingProps>(
       <h1
         ref={ref}
         className={cn(
-          "scroll-m-20 text-5xl font-extrabold tracking-tight lg:text-5xl",
+          "scroll-m-20 text-5xl font-extrabold tracking-tight lg:text-5xl mt-6",
           className,
         )}
         {...props}
@@ -52,7 +52,7 @@ const Heading2 = React.forwardRef<HTMLHeadingElement, HeadingProps>(
       <h2
         ref={ref}
         className={cn(
-          "scroll-m-20 text-4xl font-semibold tracking-tight",
+          "scroll-m-20 text-4xl font-semibold tracking-tight mt-5",
           className,
         )}
         {...props}
@@ -66,7 +66,7 @@ const Heading3 = React.forwardRef<HTMLHeadingElement, HeadingProps>(
       <h3
         ref={ref}
         className={cn(
-          "scroll-m-20 text-3xl font-semibold tracking-tight",
+          "scroll-m-20 text-3xl font-semibold tracking-tight mt-4",
           className,
         )}
         {...props}
@@ -80,7 +80,7 @@ const Heading4 = React.forwardRef<HTMLHeadingElement, HeadingProps>(
       <h4
         ref={ref}
         className={cn(
-          "scroll-m-20 text-2xl font-semibold tracking-tight",
+          "scroll-m-20 text-2xl font-semibold tracking-tight mt-3",
           className,
         )}
         {...props}
@@ -93,7 +93,7 @@ const Heading5 = React.forwardRef<HTMLHeadingElement, HeadingProps>(
     return (
       <h1
         ref={ref}
-        className={cn("scroll-m-20 tracking-tight text-xl", className)}
+        className={cn("scroll-m-20 tracking-tight text-xl mt-2", className)}
         {...props}
       />
     );
@@ -104,7 +104,7 @@ const Heading6 = React.forwardRef<HTMLHeadingElement, HeadingProps>(
     return (
       <h6
         ref={ref}
-        className={cn("scroll-m-20 tracking-tight text-base", className)}
+        className={cn("scroll-m-20 tracking-tight text-base mt-1", className)}
         {...props}
       />
     );

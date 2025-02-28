@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent } from "../ui/card";
 import Image from "next/image";
 import { Article } from "@/types/article";
+import Link from "next/link";
 interface Props {
   article: Article;
 }
@@ -20,11 +21,13 @@ export default function SectionRowArticle({ article }: Props) {
             />
           </div>
           <div className="md:col-span-2">
-            <h3 className="font-semibold mb-2">{article.title}</h3>
-            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-              {article.description}
-            </p>
-            <p className="text-sm text-muted-foreground">15 Minutes Read</p>
+            <Link href={`/articles/${article.slug}`}>
+              {" "}
+              <h3 className="font-semibold mb-2">{article.title}</h3>
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                {article.description}
+              </p>
+            </Link>
           </div>
         </div>
       </CardContent>
