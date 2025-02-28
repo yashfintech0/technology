@@ -4,12 +4,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import {
-  RenderElementProps,
-  useFocused,
-  useSelected,
-  useSlateStatic,
-} from "slate-react";
+import { RenderElementProps, useFocused, useSelected } from "slate-react";
 import Image from "next/image";
 import { ImperativePanelHandle } from "react-resizable-panels";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -28,7 +23,6 @@ export default function ImageBlock({
 }: RenderElementProps) {
   const selected = useSelected();
   const focused = useFocused();
-  const editor = useSlateStatic();
   const [dragSide, setDragSide] = useState<Draging>();
 
   const leftPanelRef = useRef<ImperativePanelHandle>(null);
@@ -44,7 +38,7 @@ export default function ImageBlock({
   };
 
   return (
-    <div {...attributes} contentEditable={false}>
+    <div {...attributes} contentEditable={false} className="mt-4">
       <ResizablePanelGroup
         direction="horizontal"
         className="max-h-[500px]"
@@ -90,7 +84,7 @@ export default function ImageBlock({
                   <Image
                     src={element.url}
                     fill
-                    alt="image"
+                    alt={element.caption || "Image"}
                     className="rounded-md"
                   />
                 </React.Fragment>
